@@ -12,6 +12,4 @@ RUN apt-get update && \
       asterisk \
   && rm -rf /var/lib/apt/lists/*
 
-RUN asterisk
-
 ENTRYPOINT ["asterisk", "-fp"]

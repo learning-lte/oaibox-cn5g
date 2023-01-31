@@ -31,7 +31,14 @@ In docker-compose file we just define the network functions which will be deploy
 
 1. Latest (latest release or master branch of the network function)
 2. develop (Build using develop branch of the network function) 
-3. version tags (ex. v1.4.0, v1.3.0)
+3. version tags (ex. v1.5.0)
+
+
+## Create IMS image
+
+```
+docker build --no-cache --target ims --tag asterisk-ims:latest --file Dockerfile .
+```
 
 ## To deploy OAI 5G CN
 
@@ -57,6 +64,7 @@ To properly configure the ims at the moment we need to add a rule in spgwu manau
 
 ```shell
 docker exec -it oai-spgwu-tiny  iptables -t nat -A POSTROUTING -o eth0 -s 12.2.1.0/24 -j SNAT --to 192.168.70.134
+docker exec -it oai-spgwu-tiny  ip route add 12.2.1.0/24 via 12.1.1.1 dev tun0
 ```
 
 

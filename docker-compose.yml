@@ -23,7 +23,6 @@ services:
     ims:
         container_name: "asterisk-ims"
         image: asterisk-ims:latest
-       # entrypoint: ["/bin/bash", "-c", "trap : SIGTERM SIGINT; sleep infinity & wait"]
         volumes:
             - ./conf/sip.conf:/etc/asterisk/sip.conf
             - ./conf/users.conf:/etc/asterisk/users.conf
@@ -40,6 +39,7 @@ services:
         image: oaisoftwarealliance/oai-udr:develop
         entrypoint: ["/openair-udr/bin/oai_udr", "-c", "/openair-udr/etc/udr.conf", "-o"]
         depends_on:
+            - mysql
             - oai-nrf
         volumes:
             - ./conf/oai-udr.conf:/openair-udr/etc/udr.conf
@@ -102,8 +102,9 @@ services:
     oai-spgwu-tiny:
         container_name: "oai-spgwu-tiny"
         image: oaisoftwarealliance/oai-spgwu-tiny:develop
-        #entrypoint: /bin/bash -c "iptables -t nat -A POSTROUTING -o eth0 -s 12.2.1.0/24 -j SNAT --to 192.168.70.134"
-        entrypoint: ["/openair-spgwu-tiny/bin/oai_spgwu", "-c", "/openair-spgwu-tiny/etc/spgw_u.conf", "-o"]
+        #for ims we need to execute below command once the container is running
+        # iptables -t nat -A POSTROUTING -o eth0 -s 12.2.1.0/24 -j SNAT --to 192.168.70.134
+        entrypoint: ["/openair-spgwu-tiny/bin/oai_spgwu", "-c", "/openair-spgwu-tiny/etc/spgw_u.conf","-o"]
         depends_on:
             - oai-nrf
         volumes:
@@ -119,17 +120,12 @@ services:
                 ipv4_address: 192.168.70.134
     oai-ext-dn:
         image: oaisoftwarealliance/trf-gen-cn5g:latest
-        init: true
+        privileged: true
         container_name: oai-ext-dn
         entrypoint: /bin/bash -c \
               "ip route add 12.1.1.0/24 via 192.168.70.134 dev eth0; sleep infinity"
-        command: ["/bin/bash", "-c", "trap : SIGTERM SIGINT; sleep infinity & wait"]
-        cap_add:
-            - NET_ADMIN
-            - SYS_ADMIN
-        cap_drop:
-            - ALL
-        privileged: true
+        depends_on:
+            - oai-spgwu-tiny
         healthcheck:
             test: /bin/bash -c "ip r | grep 12.1.1"
             interval: 10s
