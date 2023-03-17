@@ -176,22 +176,22 @@ services:
             - TYPE0=IPv4
             - DNN_RANGE0=12.1.1.2 - 12.1.1.254
             - NSSAI_SST0=1
-            - SESSION_AMBR_UL0=10000Mbps
-            - SESSION_AMBR_DL0=10000Mbps
+            - SESSION_AMBR_UL0=10Gbps
+            - SESSION_AMBR_DL0=10Gbps
             # Slice 1 (1, 0xFFFFFF)
             - DNN_NI1=openairinterface
             - TYPE1=IPv4v6
             - DNN_RANGE1=12.1.2.2 - 12.1.2.254
             - NSSAI_SST1=1
-            - SESSION_AMBR_UL1=10000Mbps
-            - SESSION_AMBR_DL1=10000Mbps
+            - SESSION_AMBR_UL1=10Gbps
+            - SESSION_AMBR_DL1=10Gbps
             # Slice 2 for ims
             - DNN_NI2=ims
             - TYPE2=IPv4v6
-            - DNN_RANGE2=12.2.1.1 - 12.2.1.254
+            - DNN_RANGE2=12.1.9.2 - 12.1.9.254
             - NSSAI_SST2=1
-            - SESSION_AMBR_UL2=10000Mbps
-            - SESSION_AMBR_DL2=10000Mbps
+            - SESSION_AMBR_UL2=10Gbps
+            - SESSION_AMBR_DL2=10Gbps
             # IMS server
             - DEFAULT_CSCF_IPV4_ADDRESS=192.168.70.139
         depends_on:
@@ -203,8 +203,6 @@ services:
     oai-spgwu-tiny:
         container_name: "oai-spgwu-tiny"
         image: oaisoftwarealliance/oai-spgwu-tiny:develop
-        #for ims we need to execute below command once the container is running
-        # iptables -t nat -A POSTROUTING -o eth0 -s 12.2.1.0/24 -j SNAT --to 192.168.70.134
         environment:
             - TZ=Europe/Paris
             - SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP=eth0
