@@ -83,6 +83,24 @@ nfs:
       port: 8080
       api_version: v1
       interface_name: eth0
+  pcf:
+    host: oai-pcf
+    sbi:
+      port: 8080
+      api_version: v1
+      interface_name: eth0
+  nef:
+    host: oai-nef
+    sbi:
+      port: 8080
+      api_version: v1
+      interface_name: eth0
+  nssf:
+    host: oai-nssf
+    sbi:
+      port: 8080
+      api_version: v1
+      interface_name: eth0
 
 #### Common for UDR and AMF
 database:

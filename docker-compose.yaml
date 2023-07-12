@@ -14,24 +14,24 @@ services:
             - MYSQL_ROOT_PASSWORD=linux
         healthcheck:
             test: /bin/bash -c "/tmp/mysql-healthcheck.sh"
-            interval: 10s
-            timeout: 5s
-            retries: 30
+            interval: 5s
+            timeout: 2s
+            retries: 10
         networks:
             public_net:
                 ipv4_address: 192.168.70.131
                 
     ims:
         container_name: "asterisk-ims"
-        image: asterisk-ims:latest
+        image: asterisk-ims:develop
         volumes:
             - ./conf/sip.conf:/etc/asterisk/sip.conf
             - ./conf/users.conf:/etc/asterisk/users.conf
         healthcheck:
             test: /bin/bash -c "pgrep asterisk"
-            interval: 10s
-            timeout: 5s
-            retries: 5
+            interval: 5s
+            timeout: 2s
+            retries: 10
         networks:
             public_net:
                 ipv4_address: 192.168.70.139
@@ -137,6 +137,70 @@ services:
         networks:
             public_net:
                 ipv4_address: 192.168.70.133
+    oai-nssf:
+        container_name: "oai-nssf"
+        image: oaisoftwarealliance/oai-nssf:develop
+        expose:
+            - 80/tcp
+            - 8080/tcp
+        # TODO: to be removed later
+        command: ["/openair-nssf/bin/oai_nssf", "-c", "/openair-nssf/etc/config.yaml", "-o"]
+        volumes:
+            - ./healthscripts/nssf-healthcheck.sh:/tmp/nssf-healthcheck.sh
+            - ./conf/config.yaml:/openair-nssf/etc/config.yaml
+        environment:
+            - TZ=Europe/Paris
+        healthcheck:
+            test: /bin/bash -c "/tmp/nssf-healthcheck.sh"
+            interval: 5s
+            timeout: 2s
+            retries: 10
+        depends_on:
+            - mysql
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.140
+    oai-nef:
+        container_name: "oai-nef"
+        image: oaisoftwarealliance/oai-nef:develop
+        expose:
+            - 80/tcp
+            - 8080/tcp
+        # TODO: to be removed later
+        command: ["/openair-nef/bin/oai_nef", "-c", "/openair-nef/etc/config.yaml", "-o"]
+        volumes:
+            - ./conf/config.yaml:/openair-nef/etc/config.yaml
+        environment:
+            - TZ=Europe/Paris
+        depends_on:
+            - mysql
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.141
+    oai-pcf:
+        container_name: "oai-pcf"
+        image: oaisoftwarealliance/oai-pcf:develop
+        expose:
+            - 80/tcp
+            - 8080/tcp
+        # TODO: to be removed later
+        command: ["/openair-pcf/bin/oai_pcf", "-c", "/openair-pcf/etc/config.yaml", "-o"]
+        volumes:
+            - ./healthscripts/pcf-healthcheck.sh:/tmp/pcf-healthcheck.sh
+            - ./policies:/openair-pcf/policies
+            - ./conf/config.yaml:/openair-pcf/etc/config.yaml
+        environment:
+            - TZ=Europe/Paris
+        healthcheck:
+            test: /bin/bash -c "/tmp/pcf-healthcheck.sh"
+            interval: 5s
+            timeout: 2s
+            retries: 10
+        depends_on:
+            - mysql
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.142
     oai-spgwu:
         container_name: "oai-spgwu"
         image: oaisoftwarealliance/oai-spgwu-tiny:develop
@@ -187,15 +251,15 @@ services:
         privileged: true
         init: true
         container_name: oai-ext-dn
-        image: oaisoftwarealliance/trf-gen-cn5g:focal
+        image: oaisoftwarealliance/trf-gen-cn5g:jammy
         entrypoint: /bin/bash -c \
               "ip route add 12.1.0.0/16 via 192.168.70.134 dev eth0; ip route; sleep infinity"
         command: ["/bin/bash", "-c", "trap : SIGTERM SIGINT; sleep infinity & wait"]
         healthcheck:
             test: /bin/bash -c "ip r | grep 12.1.0"
-            interval: 10s
-            timeout: 5s
-            retries: 5
+            interval: 5s
+            timeout: 2s
+            retries: 10
         networks:
             public_net:
                 ipv4_address: 192.168.70.135
